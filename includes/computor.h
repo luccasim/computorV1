@@ -11,7 +11,8 @@
 
 typedef enum			s_enum_errors
 {
-	PARSER = 1
+	PARSER = 1,
+	EQUALS = 2
 }						t_enum_errors;
 
 typedef enum			s_enum_debug
@@ -25,12 +26,15 @@ typedef enum			s_enum_debug
 ** Struct
 */
 
+typedef struct			s_term
+{
+	int					c;
+	int					p;
+}						t_term;
+
 typedef struct			s_polynome
 {
-	int					constant;
-	int					zero;
-	int					first;
-	int					second;
+	t_list				*list;
 }						t_polynome;
 
 typedef struct			s_env

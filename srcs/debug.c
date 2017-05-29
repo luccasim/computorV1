@@ -1,20 +1,20 @@
 #include "computor.h"
 
-static int	debug_polynome(t_polynome *pol)
+static void	debug_term(t_list *l)
 {
-	ft_printf("{c:1}Polynomes:{e}\n");
-	ft_printf("{c}%-10s%d{e}\n", "CONSTANT:", pol->constant);
-	ft_printf("{c}%-10s%d{e}\n", "DEGRES 0:", pol->zero);
-	ft_printf("{c}%-10s%d{e}\n", "DEGRES 1:", pol->first);
-	ft_printf("{c}%-10s%d{e}\n", "DEGRES 2:", pol->second);
-	return (SUCCESS);
+	t_term	*t;
+
+	t = (t_term *)l->content;
+	ft_printf("%d * X^%d ", t->c, t->p);
 }
 
 static int	debug_polynomes(t_env *env)
 {
-	debug_polynome(&env->left);
-	debug_polynome(&env->right);
-	debug_polynome(&env->reduct);
+	ft_printf("{c:1}Polynomes:{e}\n");
+	ft_lstiter(env->left.list, debug_term);
+	ft_printf("=");
+	ft_lstiter(env->right.list, debug_term);
+	ft_printf("\n");
 	return (SUCCESS);
 }
 
