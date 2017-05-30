@@ -1,6 +1,6 @@
 #include "computor.h"
 
-static int	parser_usage(char *msg)
+static int		parser_usage(char *msg)
 {
 	t_env		*env;
 	char		*eq;
@@ -13,65 +13,62 @@ static int	parser_usage(char *msg)
 	_exit(SUCCESS);
 }
 
-static int	parser_term(t_env *env, int i, t_polynome *p)
+static int		parser_term(char **av, int *n, t_polynome *p)
 {
 	t_term	t;
-	t_list	*l;
-
-	if (ft_strequ("-", env->av[i]) || ft_strequ("+", env->av[i]))
-		parser_usage(env->av[i]);
-	if (env->av[i][0] == '+' || env->av[i][0] == '-'
-		|| ft_isdigit(env->av[i][0]))
-	{
-		t.c = ft_atoi(env->av[i]);
-		PUTSTR(env->av[i]);
-		if (ft_strcmp("*", env->av[i++]))
-			parser_usage(env->av[--i]);
-		if (ft_strncmp("X^", env->av[i++], 2))
-			parser_usage(env->av[--i]);
-		if ((t.p = ft_atoi(env->av[i])) < 0)
-			parser_usage(env->av[i]);
-	}
-	l = ft_lstnew(&t, sizeof(t));
-	ft_lstadd(&p->list, l);
-	return (SUCCESS);
-}
-
-static int	parser_left(t_env *env)
-{
+	int		s;
 	int		i;
 
-	i = 1;
-	while (i < env->ac)
+	s = 1;
+	i = *n;
+	if (ft_strequ("-", av[i]) || ft_strequ("+", av[i]))
+		s = (av[i++][0] == '-') ? -1 : 1;
+	if (av[i] == 0)
+		parser_usage("Missing A * X^N");
+	if (av[i][0] == '+' || av[i][0] == '-'
+		|| ft_isdigit(av[i][0]))
 	{
-		parser_term(env, i, &env->left);
-		i += 3;
-		if (ft_strequ(env->av[i], "="))
-			return (i);
+		t.c = ft_atoi(av[i++]) * s;
+		if ((av[i] == 0) || ft_strcmp("*", av[i++]))
+			parser_usage("'*' require");
+		if ((av[i] == 0) || ft_strncmp("X^", av[i], 2))
+			parser_usage("Wrong format X^N");
+		if ((av[i] == 0) || ((t.p = ft_atoi(&av[i][2])) < 0))
+			parser_usage("N power not valid");
 	}
+	ft_lstadd(&p->list, ft_lstnew(&t, sizeof(t)));
+	*n = ++i;
 	return (SUCCESS);
 }
 
-static int	parser_right(t_env *env, int i)
+static int		parser_polynome(t_polynome *p, char *str)
 {
-	if (i == SUCCESS)
-		parser_usage("=");
-	while (i < env->ac)
-	{
-		parser_term(env, i, &env->right);
-		i += 3;
-	}
+	int		i;
+	int		len;
+	char	**s;
+
+	s = ft_strsplit(str, ' ');
+	len = ft_strstrlen(s);
+	i = 0;
+	while (i < len)
+		parser_term(s, &i, p);
+	ft_strdelsplit(s);
 	return (SUCCESS);
 }
 
-int			parser(t_env *env)
+int				parser(t_env *env)
 {
-	int		ret;
+	char	**s;
 
 	if (ERROR)
 		return (FAIL);
-	ret = parser_left(env);
-	parser_right(env, ret);
+	if (env->ac != 2)
+		parser_usage(0);
+	s = ft_strsplit(env->av[1], '=');
+	if (ft_strstrlen(s) != 2)
+		parser_usage("Equation have more or less 1 '='");
+	parser_polynome(&env->left, s[0]);
+	ft_strdelsplit(s);
 	debug(DEBUG_POLYNOME);
 	return (SUCCESS);
 }
